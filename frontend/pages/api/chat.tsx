@@ -23,7 +23,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       parts: [{ text: msg.content }],
     }));
 
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    // Fetch available models
+    // Use a predefined model name directly
+    const modelName = "gemini-default-model"; // Replace with the actual model name from the library documentation
+    console.log("Using model:", modelName);
+    if (!modelName) {
+      return res.status(500).json({ error: "No valid model found for the request" });
+    }
+
+    const model = genAI.getGenerativeModel({ model: modelName });
 
     // Start a new chat session
     const chat = model.startChat({ history: formattedHistory });

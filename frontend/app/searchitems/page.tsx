@@ -2,19 +2,14 @@
 import MultiActionAreaCard from "@/components/cards";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useRouter } from "next/navigation";
-// import { Grid } from "lucide-react";
-import { Search } from "lucide-react";
-// import { Button, Dropdown } from "react-bootstrap";
+import { Search, Filter, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
-// import { Grid2 } from "@mui/material";
-// import { styled } from "@mui/material/styles";
 import Grid from "@mui/material/Grid2";
-// import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
-// import { it } from "node:test";
 import { Dropdown } from "react-bootstrap";
 import Button from "react-bootstrap/Button";
+
 interface Item {
   _id: string;
   ItemName: string;
@@ -23,15 +18,14 @@ interface Item {
   Category: string;
   SellerName: string;
   SellerID: string;
-  // Add other properties if needed
 }
 
 export default function SearchItems() {
   const [search, setSearch] = useState("");
   const [items, setItems] = useState<Item[]>([]);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
-  const [filtereditems, setFilteredItems] = useState<Item[]>([]);
   const [selectedPriceRange, setSelectedPriceRange] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
 
   const priceRanges = [
     { label: "₹0 - ₹500", min: 0, max: 500 },
@@ -40,13 +34,24 @@ export default function SearchItems() {
     { label: "₹5000+", min: 5001, max: Infinity },
   ];
 
-  let filter = ["Electronics", "Sports & Outdoors", "Home & Kitchen","Travel Accessories","Office Supplies","Furniture"];
-  useEffect(() => {
-    const token = Cookies.get("token");
+  const categories = [
+    "Electronics", 
+    "Sports & Outdoors", 
+    "Home & Kitchen",
+    "Travel Accessories",
+    "Office Supplies",
+    "Furniture"
+  ];
 
-    if (token) {
-      const logout = async () => {
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      const token = Cookies.get("token");
+      
+      if (token) {
         try {
+          setIsLoading(true);
           const response = await fetch("http://localhost:5000/api/items/allitems", {
             method: "GET",
             headers: {
@@ -54,27 +59,29 @@ export default function SearchItems() {
             },
           });
           const data = await response.json();
-          console.log("response", data.message);
-
-          console.log("response", data.items);
-          setItems(data.items);
-          console.log("items", items);
+          
+          if (response.ok && data.items) {
+            setItems(data.items);
+          } else {
+            console.error("Failed to fetch items:", data.message);
+          }
         } catch (error) {
-          console.error("Error during logout:", error);
+          console.error("Error fetching items:", error);
+        } finally {
+          setIsLoading(false);
         }
-      };
+      } else {
+        setIsLoading(false);
+      }
+    };
 
-      logout();
-    }
+    fetchItems();
   }, []);
-  const router = useRouter();
- 
 
   const handleCardClick = (ID: string) => {
-    console.log("clicked");
-    // Redirect to /items with the id
     router.push(`/items/${ID}`);
   };
+
   const handleFilterClick = (category: string) => {
     setSelectedFilters((prev) =>
       prev.includes(category)
@@ -83,140 +90,285 @@ export default function SearchItems() {
     );
   };
 
-  const handlefilterclick = (category: string) => {
-    console.log(category);
-  };
   const handlePriceFilterClick = (range: string) => {
-    if (selectedPriceRange === range) {
-      setSelectedPriceRange(""); // Deselect the price range
-    } else {
-      setSelectedPriceRange(range); // Select the new price range
-    }
+    setSelectedPriceRange(selectedPriceRange === range ? "" : range);
   };
 
+  const clearAllFilters = () => {
+    setSelectedFilters([]);
+    setSelectedPriceRange("");
+    setSearch("");
+  };
+
+  // Fixed filtering logic with proper null/undefined checks
   const filteredItems = items.filter((item) => {
-    const matchesSearch =
-      search.toLowerCase() === "" ||
-      item.ItemName.toLowerCase().includes(search.toLowerCase());
+    // Safe search matching with null/undefined checks
+    const itemName = item?.ItemName || "";
+    const searchQuery = search || "";
+    const matchesSearch = 
+      searchQuery.trim() === "" || 
+      itemName.toLowerCase().includes(searchQuery.toLowerCase());
+
+    // Category filtering
     const matchesCategory =
-      selectedFilters.length === 0 || selectedFilters.includes(item.Category);
+      selectedFilters.length === 0 || 
+      selectedFilters.includes(item?.Category || "");
+
+    // Price filtering
     const priceFilter = priceRanges.find(
       (range) => range.label === selectedPriceRange
     );
+    const itemPrice = item?.price || 0;
     const matchesPrice =
       !priceFilter ||
-      (item.price >= priceFilter.min && item.price <= priceFilter.max);
+      (itemPrice >= priceFilter.min && itemPrice <= priceFilter.max);
 
     return matchesSearch && matchesCategory && matchesPrice;
   });
+
+  const activeFiltersCount = selectedFilters.length + (selectedPriceRange ? 1 : 0);
+
   return (
-    <>
-      {/* <div className="py-20 h-screen bg-gray-300 px-2"> */}
-      <div
-        className="max-w-md mx-auto rounded-lg overflow-hidden "
-        style={{ maxWidth: "900px", marginBottom: "10px" }}
-      >
-        <div className="md:flex">
-          <div className="w-full p-3">
-            <div className="relative">
-              <Search className="absolute fa fa-search text-gray-400 top-3.5 left-3" />
-              <input
-                onChange={(e) => setSearch(e.target.value)}
-                type="text"
-                className="bg-white h-14 w-full px-12 rounded-lg focus:outline-none hover:cursor-pointer"
-                name="search items"
-                placeholder="Search items"
-              />
-              <span className="absolute top-4 right-5 border-l pl-4">
-                <i className="fa fa-microphone text-gray-500 hover:text-green-500 hover:cursor-pointer" />
-              </span>
+    <div style={{ backgroundColor: '#ffffff', minHeight: '100vh', color: '#000000' }}>
+      <div className="container-fluid px-3 py-4">
+        {/* Header Section */}
+        <div className="row mb-4">
+          <div className="col-12">
+            <div className="text-center mb-4">
+              <h1 className="display-6 fw-bold text-dark mb-2">Discover Amazing Items</h1>
+              <p className="text-muted">Find exactly what you're looking for from our curated collection</p>
             </div>
           </div>
         </div>
-      </div>
-      <div
-        className="container"
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "center", // Center horizontally
-          alignItems: "center", // Center vertically
-          height: "50px", // Full viewport height
-          // backgroundColor: "#ffffff", // White background
-          padding: "5px",
-          // width: "45vw",
-          marginBottom: "20px",
-        }}
-      >
-        <div style={{ display: "flex", flexWrap: "wrap" }}>
-          {filter.map((category: string) => (
-            <Button
-              key={category}
-              style={{
-                margin: "2px",
-                backgroundColor: selectedFilters.includes(category)
-                  ? "#007bff"
-                  : "#005099",
-              }}
-              onClick={() => handleFilterClick(category)}
-            >
-              {category}
-            </Button>
-          ))}
+
+        {/* Search Section */}
+        <div className="row justify-content-center mb-4">
+          <div className="col-12 col-md-8 col-lg-6">
+            <div className="position-relative">
+              <Search 
+                className="position-absolute text-muted" 
+                style={{ 
+                  top: '50%', 
+                  left: '15px', 
+                  transform: 'translateY(-50%)',
+                  zIndex: 10 
+                }} 
+                size={20}
+              />
+              <input
+                onChange={(e) => setSearch(e.target.value)}
+                value={search}
+                type="text"
+                className="form-control form-control-lg shadow-sm"
+                style={{
+                  paddingLeft: '50px',
+                  borderRadius: '50px',
+                  border: '2px solid #e9ecef',
+                  backgroundColor: '#f8f9fa',
+                  transition: 'all 0.3s ease'
+                }}
+                placeholder="Search for items..."
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#007bff';
+                  e.target.style.backgroundColor = '#ffffff';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#e9ecef';
+                  e.target.style.backgroundColor = '#f8f9fa';
+                }}
+              />
+            </div>
+          </div>
         </div>
 
-        <Dropdown style={{ marginLeft: "10px" }}>
-          <Dropdown.Toggle id="dropdown-basic">
-            {selectedPriceRange || "Select Price Range"}{" "}
-          </Dropdown.Toggle>
+        {/* Filters Section */}
+        <div className="row justify-content-center mb-4">
+          <div className="col-12">
+            <div className="d-flex flex-wrap justify-content-center align-items-center gap-2 mb-3">
+              <div className="d-flex align-items-center me-3">
+                <Filter size={18} className="text-muted me-2" />
+                <span className="fw-semibold text-dark">Filters:</span>
+                {activeFiltersCount > 0 && (
+                  <span className="badge bg-primary ms-2">{activeFiltersCount}</span>
+                )}
+              </div>
+              
+              {/* Category Filters */}
+              {categories.map((category) => (
+                <Button
+                  key={category}
+                  variant={selectedFilters.includes(category) ? "primary" : "outline-primary"}
+                  size="sm"
+                  className="rounded-pill"
+                  style={{
+                    transition: 'all 0.3s ease',
+                    fontWeight: '500'
+                  }}
+                  onClick={() => handleFilterClick(category)}
+                >
+                  {category}
+                </Button>
+              ))}
 
-          <Dropdown.Menu>
-            {priceRanges.map((range) => (
-              <Dropdown.Item
-                key={range.label}
-                onClick={() => handlePriceFilterClick(range.label)}
-                style={{
-                  backgroundColor:
-                    selectedPriceRange === range.label ? "#007bff" : "#ffffff",
-                }}
-              >
-                {range.label}
-              </Dropdown.Item>
-            ))}
-          </Dropdown.Menu>
-        </Dropdown>
+              {/* Price Range Dropdown */}
+              <Dropdown>
+                <Dropdown.Toggle 
+                  variant={selectedPriceRange ? "primary" : "outline-primary"}
+                  size="sm" 
+                  className="rounded-pill"
+                  style={{ fontWeight: '500' }}
+                >
+                  {selectedPriceRange || "Price Range"}
+                </Dropdown.Toggle>
+                <Dropdown.Menu className="shadow-lg border-0">
+                  {priceRanges.map((range) => (
+                    <Dropdown.Item
+                      key={range.label}
+                      onClick={() => handlePriceFilterClick(range.label)}
+                      className={selectedPriceRange === range.label ? "active" : ""}
+                      style={{
+                        fontWeight: selectedPriceRange === range.label ? '600' : '400'
+                      }}
+                    >
+                      {range.label}
+                    </Dropdown.Item>
+                  ))}
+                </Dropdown.Menu>
+              </Dropdown>
+
+              {/* Clear Filters Button */}
+              {activeFiltersCount > 0 && (
+                <Button
+                  variant="outline-danger"
+                  size="sm"
+                  className="rounded-pill d-flex align-items-center"
+                  onClick={clearAllFilters}
+                >
+                  <X size={16} className="me-1" />
+                  Clear All
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Results Summary */}
+        <div className="row mb-3">
+          <div className="col-12">
+            <div className="d-flex justify-content-between align-items-center">
+              <p className="text-muted mb-0">
+                {isLoading ? "Loading..." : `Showing ${filteredItems.length} of ${items.length} items`}
+              </p>
+              {search && (
+                <p className="text-muted mb-0 small">
+                  Search results for "{search}"
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Items Grid */}
+        <Box sx={{ flexGrow: 1 }}>
+          {isLoading ? (
+            <div className="text-center py-5">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p className="text-muted mt-3">Loading items...</p>
+            </div>
+          ) : filteredItems.length === 0 ? (
+            <div className="text-center py-5">
+              <div className="mb-4">
+                <Search size={64} className="text-muted" />
+              </div>
+              <h4 className="text-muted mb-3">No items found</h4>
+              <p className="text-muted">
+                {search || selectedFilters.length > 0 || selectedPriceRange
+                  ? "Try adjusting your search criteria or filters"
+                  : "No items available at the moment"}
+              </p>
+              {activeFiltersCount > 0 && (
+                <Button
+                  variant="outline-primary"
+                  className="mt-3"
+                  onClick={clearAllFilters}
+                >
+                  Clear Filters
+                </Button>
+              )}
+            </div>
+          ) : (
+            <Grid
+              container
+              spacing={{ xs: 2, sm: 3, md: 4 }}
+              columns={{ xs: 4, sm: 8, md: 12, lg: 12 }}
+            >
+              {filteredItems.map((item, index) => (
+                <Grid 
+                  key={item._id || index} 
+                  size={{ xs: 4, sm: 4, md: 4, lg: 3 }}
+                >
+                  <div 
+                    style={{
+                      transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-5px)';
+                      e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  >
+                    <MultiActionAreaCard
+                      Category={item.Category || "Uncategorized"}
+                      id={item._id}
+                      title={item.ItemName || "Untitled"}
+                      description={item.Description || "No description available"}
+                      price={item.price || 0}
+                      name={item.SellerName || "Unknown Seller"}
+                      onClick={() => handleCardClick(item._id)}
+                    />
+                  </div>
+                </Grid>
+              ))}
+            </Grid>
+          )}
+        </Box>
       </div>
 
-      {/* </div> */}
-
-      <Box sx={{ flexGrow: 1 }}>
-        <Grid
-          container
-          spacing={{ xs: 1, sm: 2, md: 4 }}
-          columns={{ xs: 4, sm: 9, md: 12 }}
-        >
-          {filteredItems
-            .filter((items) => {
-              return search.toLowerCase() === ""
-                ? items
-                : items.ItemName.toLowerCase().includes(search.toLowerCase());
-            })
-            .map((item, index) => (
-              <Grid key={index} size={{ xs: 6, sm: 3, md: 3 }}>
-                {/* <Item>{index + 1}</Item> */}
-                <MultiActionAreaCard
-                  Category={item.Category}
-                  id={item._id}
-                  title={item.ItemName}
-                  description={item.Description}
-                  price={item.price}
-                  name={""}
-                  onClick={() => handleCardClick(item._id)} // Attach click handler
-                ></MultiActionAreaCard>
-              </Grid>
-            ))}
-        </Grid>
-      </Box>
-    </>
+      {/* Custom Styles */}
+      <style jsx>{`
+        .form-control:focus {
+          box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+        }
+        
+        .btn:hover {
+          transform: translateY(-1px);
+        }
+        
+        .dropdown-menu {
+          border-radius: 15px !important;
+        }
+        
+        .dropdown-item:hover {
+          background-color: #f8f9fa !important;
+        }
+        
+        @media (max-width: 768px) {
+          .display-6 {
+            font-size: 1.8rem !important;
+          }
+          
+          .btn-sm {
+            font-size: 0.8rem !important;
+            padding: 0.4rem 0.8rem !important;
+          }
+        }
+      `}</style>
+    </div>
   );
 }

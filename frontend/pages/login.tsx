@@ -64,7 +64,15 @@ function Login() {
       style={{ overflow: "hidden" }}
     >
       <div className={styles.loginform} id="loginform">
-        <h1 style={{ marginBottom: "30px",color:"blue" ,fontFamily:"fair display bold"}}>Login</h1>
+        <h1
+          style={{
+            // marginBottom: "30px",
+            color: "blue",
+            // fontFamily: "fair display bold",
+          }}
+        >
+          Login
+        </h1>
         <Form onSubmit={onSubmit}>
           <Form.Group className="mb-4" controlId="formGroupEmail">
             <Form.Label>Email </Form.Label>
@@ -109,8 +117,10 @@ function Login() {
               // marginTop: "10px",
             }}
           >
-            <span >Don't have an account ? </span>
-            <a href="/signup" style={{textDecoration:"none"}}>signup</a>
+            <span>Don't have an account ? </span>
+            <a href="/signup" style={{ textDecoration: "none" }}>
+              signup
+            </a>
           </div>
 
           {error && (

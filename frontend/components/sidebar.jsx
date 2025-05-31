@@ -7,28 +7,25 @@ import { ShoppingCart } from 'lucide-react';
 import { ShoppingBag } from 'lucide-react';
 import { Store } from "lucide-react";
 import { MessageCircleMore } from 'lucide-react';
-
 import {
-
   Menu,
   X,
+  LogOut
 } from "lucide-react";
 import Cookies from "js-cookie";
 import Button from "react-bootstrap/esm/Button";
-const SidebarLayout = ({ children }) => {
-  //   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(true);
-  const [activeLink, setActiveLink] = useState("home");
-  const [expandedMenus, setExpandedMenus] = useState([]);
-  // const [searchQuery, setSearchQuery] = useState("");
+
+const HorizontalNavLayout = ({ children }) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeLink, setActiveLink] = useState("Profile");
 
   const menuItems = [
-      {
-        id: "Profile",
-        title: "Proflie",
-        icon: <UserRoundPen className="w-5 h-5" />,
-        href: "/",
-      },
+    {
+      id: "Profile",
+      title: "Profile",
+      icon: <UserRoundPen className="w-5 h-5" />,
+      href: "/",
+    },
     {
       id: "SearchItems",
       title: "Search Items",
@@ -61,101 +58,122 @@ const SidebarLayout = ({ children }) => {
     },
   ];
 
-  const toggleSidebar = () => setIsOpen(!isOpen);
+  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
-  const toggleSubmenu = (id) => {
-    setExpandedMenus((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
-  };
-  const handleClicked = () => {
+  const handleLogout = () => {
     Cookies.remove("token");
     Cookies.remove("userdetails");
-    console.log("clicked");
-    // router.push("/login");
+    console.log("Logout clicked");
     redirect("/login");
   };
+
   const handleLinkClick = (id, href) => {
     setActiveLink(id);
-    // router.push(href);
+    setIsMobileMenuOpen(false); // Close mobile menu on link click
     redirect(href);
   };
 
   return (
-    <div className="min-h-screen flex" style={{ backgroundColor: "#dfe8ed" }}>
-      {/* Hamburger menu for mobile */}
-      <button
-        onClick={toggleSidebar}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-gray-800 text-white"
-        aria-label={isOpen ? "Close sidebar" : "Open sidebar"}
-      >
-        {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-      </button>
+    <div className="min-h-screen bg-white">
+      {/* Header Navigation */}
+      <header className="bg-white border-b-2 border-gray-100 shadow-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Brand/Logo */}
+            <div className="flex-shrink-0">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
+                Buy & Sell <span className="text-blue-600">@IIITH</span>
+              </h1>
+            </div>
 
-      {/* Sidebar */}
-      <aside
-        className={`fixed lg:relative top-0 left-0 h-screen bg-white dark:bg-gray-800 shadow-xl transition-all duration-300 ease-in-out z-40
-          ${isOpen ? "w-64" : "w-0 lg:w-20"} overflow-hidden`}
-        aria-label="Sidebar navigation"
-      >
-        <div
-          className="h-full px-4 py-6 overflow-y-auto"
-          style={{ backgroundColor: "	#1a2c40" }}
-        >
-          <div className={`mb-20 `} style={{ color:"#ffff",fontFamily: "fairdisplay", fontSize: "3rem",marginTop: "70px",marginLeft: "30px"}}>
-            <h2>Buy and sell @IIITH</h2>
-          </div>
-
-          <nav>
-            <ul className="space-y-1">
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex items-center space-x-1">
               {menuItems.map((item) => (
-                <li key={item.id}>
-                  <button
-                    onClick={() => {
-                      handleLinkClick(item.id, item.href);
-                      toggleSubmenu(item.id);
-                    }}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors duration-200
-                      ${
-                        activeLink === item.id
-                          ? "bg-#f8f8f8 text-white"
-                          : "text-gray-400"
-                      }
-                    `}
-                    aria-expanded={expandedMenus.includes(item.id)}
-                    aria-controls={`${item.id}-submenu`}
-                  >
-                    <div className="flex items-center">
-                      <span className="mr-3">{item.icon}</span>
-                      <span className={`${!isOpen && "lg:hidden"}`}>
-                        {item.title}
-                      </span>
-                    </div>
-                  </button>
-                </li>
+                <button
+                  key={item.id}
+                  onClick={() => handleLinkClick(item.id, item.href)}
+                  className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-gray-50 hover:scale-105 ${
+                    activeLink === item.id
+                      ? "bg-blue-50 text-blue-700 border border-blue-200"
+                      : "text-gray-700 hover:text-gray-900"
+                  }`}
+                >
+                  <span className="mr-2">{item.icon}</span>
+                  <span className="hidden xl:inline">{item.title}</span>
+                </button>
               ))}
-            </ul>
-            <Button variant={"secondary"} onClick={handleClicked} style={{ marginLeft: "60px",fontSize: "1.2rem",fontFamily: "fairdisplay",color: "#ffff"}}>
-              Logout
-            </Button>
-          </nav>
-        </div>
-      </aside>
+              
+              {/* Logout Button */}
+              <button
+                onClick={handleLogout}
+                className="flex items-center px-4 py-2 ml-4 bg-red-50 text-red-700 rounded-lg text-sm font-medium hover:bg-red-100 transition-all duration-200 border border-red-200 hover:scale-105"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                <span className="hidden xl:inline">Logout</span>
+              </button>
+            </nav>
 
-      {/* Main content area */}
-      <main
-        className={`flex-1 p-8 transition-all duration-300 ease-in-out ${
-          isOpen ? "lg:ml-0" : "lg:ml-0"
-        }`}
-        style={{
-          maxHeight: 'calc(100vh - 70px)',  // Adjust this value based on the height of your header or other fixed elements
-          overflowY: 'auto',               // Enable vertical scrolling
-        }}
-      >
-        {children}
+            {/* Mobile menu button */}
+            <div className="lg:hidden">
+              <button
+                onClick={toggleMobileMenu}
+                className="p-2 rounded-lg text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none transition-colors duration-200"
+                aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+              >
+                {isMobileMenuOpen ? (
+                  <X className="w-6 h-6" />
+                ) : (
+                  <Menu className="w-6 h-6" />
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Navigation Menu */}
+        <div
+          className={`lg:hidden transition-all duration-300 ease-in-out overflow-hidden ${
+            isMobileMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+          }`}
+        >
+          <div className="bg-white border-t border-gray-100 px-4 py-3">
+            <nav className="space-y-2">
+              {menuItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => handleLinkClick(item.id, item.href)}
+                  className={`w-full flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    activeLink === item.id
+                      ? "bg-blue-50 text-blue-700 border border-blue-200"
+                      : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                  }`}
+                >
+                  <span className="mr-3">{item.icon}</span>
+                  <span>{item.title}</span>
+                </button>
+              ))}
+              
+              {/* Mobile Logout Button */}
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center px-4 py-3 mt-4 bg-red-50 text-red-700 rounded-lg text-sm font-medium hover:bg-red-100 transition-all duration-200 border border-red-200"
+              >
+                <LogOut className="w-4 h-4 mr-3" />
+                <span>Logout</span>
+              </button>
+            </nav>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-white rounded-lg">
+          {children}
+        </div>
       </main>
     </div>
   );
 };
 
-export default SidebarLayout;
+export default HorizontalNavLayout;
