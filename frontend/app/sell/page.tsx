@@ -1,17 +1,17 @@
 "use client";
-import React, { useEffect, useState, FormEvent } from "react";
+import React, {useState, FormEvent } from "react";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-import { 
-  Package, 
-  DollarSign, 
-  FileText, 
-  Tag, 
+import {
+  Package,
+
+  FileText,
+  Tag,
   Upload,
   CheckCircle,
   AlertCircle,
   Loader2,
-  ReceiptIndianRupee
+  ReceiptIndianRupee,
 } from "lucide-react";
 
 interface FormData {
@@ -19,11 +19,12 @@ interface FormData {
   Price: string;
   Description: string;
   Category: string;
+  ImageUrl: string;
 }
 
 interface AlertState {
   message: string;
-  type: 'success' | 'error' | '';
+  type: "success" | "error" | "";
 }
 
 export default function ProductListingForm() {
@@ -33,7 +34,8 @@ export default function ProductListingForm() {
     ItemName: "",
     Price: "",
     Description: "",
-    Category: ""
+    Category: "",
+    ImageUrl: "",
   });
   const router = useRouter();
 
@@ -47,18 +49,22 @@ export default function ProductListingForm() {
     "Toys & Games",
     "Automotive",
     "Jewelry & Accessories",
-    "Other"
+    "Other",
   ];
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
-  const showAlert = (message: string, type: 'success' | 'error') => {
+  const showAlert = (message: string, type: "success" | "error") => {
     setAlert({ message, type });
     setTimeout(() => setAlert({ message: "", type: "" }), 5000);
   };
@@ -85,13 +91,13 @@ export default function ProductListingForm() {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setIsLoading(true);
-    
+
     try {
-      const response = await fetch("http://localhost:5000/api/items/additems", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/items/additems`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -102,6 +108,7 @@ export default function ProductListingForm() {
           Price: formData.Price,
           Description: formData.Description,
           Category: formData.Category,
+          ImageUrl: formData.ImageUrl,
         }),
       });
 
@@ -109,25 +116,32 @@ export default function ProductListingForm() {
         const responseData = await response.json();
         console.log(responseData);
         showAlert("Product listed successfully! Redirecting...", "success");
-        
+
         // Reset form
         setFormData({
           ItemName: "",
           Price: "",
           Description: "",
-          Category: ""
+          Category: "",
+          ImageUrl: "",
         });
-        
+
         setTimeout(() => {
           router.push("/");
         }, 1500);
       } else {
         const errorData = await response.json();
-        showAlert(errorData.message || "Failed to list product. Please try again.", "error");
+        showAlert(
+          errorData.message || "Failed to list product. Please try again.",
+          "error"
+        );
       }
     } catch (error) {
       console.error("Error:", error);
-      showAlert("Network error. Please check your connection and try again.", "error");
+      showAlert(
+        "Network error. Please check your connection and try again.",
+        "error"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -141,18 +155,24 @@ export default function ProductListingForm() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-4">
             <Package className="h-8 w-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">List Your Product</h1>
-          <p className="text-gray-600">Share your amazing products with the world</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            List Your Product
+          </h1>
+          <p className="text-gray-600">
+            Share your amazing products with the world
+          </p>
         </div>
 
         {/* Alert */}
         {alert.message && (
-          <div className={`mb-6 p-4 rounded-lg border flex items-center gap-3 animate-in slide-in-from-top-2 duration-300 ${
-            alert.type === 'success' 
-              ? 'bg-green-50 border-green-200 text-green-800' 
-              : 'bg-red-50 border-red-200 text-red-800'
-          }`}>
-            {alert.type === 'success' ? (
+          <div
+            className={`mb-6 p-4 rounded-lg border flex items-center gap-3 animate-in slide-in-from-top-2 duration-300 ${
+              alert.type === "success"
+                ? "bg-green-50 border-green-200 text-green-800"
+                : "bg-red-50 border-red-200 text-red-800"
+            }`}
+          >
+            {alert.type === "success" ? (
               <CheckCircle className="h-5 w-5 flex-shrindian-rupeeink-0" />
             ) : (
               <AlertCircle className="h-5 w-5 flex-shrink-0" />
@@ -185,12 +205,14 @@ export default function ProductListingForm() {
               {/* Price */}
               <div className="group">
                 <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-                {/* < /> */}
-                  < ReceiptIndianRupee className="h-4 w-4" />
+                  {/* < /> */}
+                  <ReceiptIndianRupee className="h-4 w-4" />
                   Price
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">Rs</span>
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">
+                    Rs
+                  </span>
                   <input
                     type="number"
                     name="Price"
@@ -227,6 +249,22 @@ export default function ProductListingForm() {
                 </select>
               </div>
 
+              {/* Image URL */}
+              <div className="group">
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                  <Upload className="h-4 w-4" />
+                  Image URL
+                </label>
+                <input
+                  type="text"
+                  name="ImageUrl"
+                  value={formData.ImageUrl}
+                  onChange={handleInputChange}
+                  placeholder="Enter the image URL"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 group-hover:border-gray-400"
+                  required
+                />
+              </div>
               {/* Description */}
               <div className="group">
                 <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
@@ -273,19 +311,24 @@ export default function ProductListingForm() {
           {/* Footer */}
           <div className="bg-gray-50 px-8 py-4 border-t border-gray-100">
             <p className="text-sm text-gray-600 text-center">
-              By listing your product, you agree to our terms of service and privacy policy.
+              By listing your product, you agree to our terms of service and
+              privacy policy.
             </p>
           </div>
         </div>
 
         {/* Tips Card */}
         <div className="mt-8 bg-blue-50 rounded-xl p-6 border border-blue-100">
-          <h3 className="font-semibold text-blue-900 mb-3">💡 Tips for better listings</h3>
+          <h3 className="font-semibold text-blue-900 mb-3">
+            💡 Tips for better listings
+          </h3>
           <ul className="text-sm text-blue-800 space-y-1">
             <li>• Use clear, descriptive product names</li>
             <li>• Set competitive prices based on market research</li>
             <li>• Write detailed descriptions highlighting key features</li>
-            <li>• Choose the most appropriate category for better visibility</li>
+            <li>
+              • Choose the most appropriate category for better visibility
+            </li>
           </ul>
         </div>
       </div>

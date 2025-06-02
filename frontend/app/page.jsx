@@ -31,7 +31,7 @@ export default function Profile() {
     if (token) {
       const fetchUserDetails = async () => {
         try {
-          const response = await fetch("http://localhost:5000/api/users/getuserdetails", {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/getuserdetails`, {
             method: "GET",
             headers: {
               Authorization: `Bearer ${token}`,

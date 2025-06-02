@@ -6,16 +6,16 @@ import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import { useRouter } from "next/router";
 import Cookies from "js-cookie";
-// import Link from "next/link";
+import Link from "next/link";
 import Alert from "react-bootstrap/Alert";
 
 function Login() {
-  const [show, setShow] = useState(true);
   const [error, setError] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [refreshReCaptcha, setRefreshReCaptcha] = useState(false);
   const Router = useRouter();
+
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     console.log("onSubmit");
     event.preventDefault();
@@ -25,8 +25,8 @@ function Login() {
       email: formData.get("email"),
       password: formData.get("password"),
     };
-    // const cookieStore = await cookies()
-    const response = await fetch("http://localhost:5000/api/users/login", {
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -48,15 +48,14 @@ function Login() {
       console.log("cookie is set");
     } else {
       const responseData = await response.json();
-      console.log();
       const er = responseData.message;
       setError(er);
       setEmail("");
       setPassword("");
       setRefreshReCaptcha(!refreshReCaptcha);
-      // console.error("Login failed:", response.statusText);
     }
   }
+
   return (
     <div
       className={styles.logincontainer}
@@ -66,9 +65,7 @@ function Login() {
       <div className={styles.loginform} id="loginform">
         <h1
           style={{
-            // marginBottom: "30px",
             color: "blue",
-            // fontFamily: "fair display bold",
           }}
         >
           Login
@@ -114,24 +111,21 @@ function Login() {
               position: "relative",
               textDecoration: "none",
               padding: "8px",
-              // marginTop: "10px",
             }}
           >
-            <span>Don't have an account ? </span>
-            <a href="/signup" style={{ textDecoration: "none" }}>
+            <span>Don&apos;t have an account? </span>
+            <Link href="/signup" style={{ textDecoration: "none" }}>
               signup
-            </a>
+            </Link>
           </div>
 
           {error && (
             <Alert
               key={"danger"}
               variant={"danger"}
-              onClose={() => setShow(false)}
             >
               {error}
             </Alert>
-            // </div>
           )}
         </Form>
       </div>

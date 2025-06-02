@@ -13,6 +13,7 @@ import Button from "react-bootstrap/Button";
 interface Item {
   _id: string;
   ItemName: string;
+  ImageURL:string;
   price: number;
   Description: string;
   Category: string;
@@ -52,7 +53,7 @@ export default function SearchItems() {
       if (token) {
         try {
           setIsLoading(true);
-          const response = await fetch("http://localhost:5000/api/items/allitems", {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/items/allitems`, {
             method: "GET",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -61,6 +62,8 @@ export default function SearchItems() {
           const data = await response.json();
           
           if (response.ok && data.items) {
+            console.log(data.items);
+            
             setItems(data.items);
           } else {
             console.error("Failed to fetch items:", data.message);
@@ -136,7 +139,7 @@ export default function SearchItems() {
           <div className="col-12">
             <div className="text-center mb-4">
               <h1 className="display-6 fw-bold text-dark mb-2">Discover Amazing Items</h1>
-              <p className="text-muted">Find exactly what you're looking for from our curated collection</p>
+              <p className="text-muted">Find exactly what you&apos;re looking for from our curated collection</p>
             </div>
           </div>
         </div>
@@ -261,7 +264,7 @@ export default function SearchItems() {
               </p>
               {search && (
                 <p className="text-muted mb-0 small">
-                  Search results for "{search}"
+                  Search results for &quot;{search}&quot;
                 </p>
               )}
             </div>
@@ -323,10 +326,13 @@ export default function SearchItems() {
                       e.currentTarget.style.boxShadow = 'none';
                     }}
                   >
+                    {/* console.l */}
+                    {/* console.lo */}
                     <MultiActionAreaCard
                       Category={item.Category || "Uncategorized"}
                       id={item._id}
                       title={item.ItemName || "Untitled"}
+                      ImageUrl={item.ImageURL || "/iiit.png"}
                       description={item.Description || "No description available"}
                       price={item.price || 0}
                       name={item.SellerName || "Unknown Seller"}

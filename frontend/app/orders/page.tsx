@@ -75,7 +75,7 @@ const OrdersManagement: React.FC = () => {
 
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/orders/getorders', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/orders/getorders`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -109,7 +109,7 @@ const OrdersManagement: React.FC = () => {
 
     try {
       setRegeneratingOTP(orderId);
-      const response = await fetch('http://localhost:5000/api/orders/regenarteotp', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/orders/regenarteotp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -145,7 +145,7 @@ const OrdersManagement: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
     switch (status?.toLowerCase()) {
       case 'pending': return 'warning';
       case 'delivered': return 'success';
@@ -216,7 +216,7 @@ const OrdersManagement: React.FC = () => {
                   <Chip 
                     label={order.Status} 
                     size="small" 
-                    color={getStatusColor(order.Status) as any}
+                    color={getStatusColor(order.Status)}
                     sx={{ ml: 1 }}
                   />
                 )}

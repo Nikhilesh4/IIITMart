@@ -23,8 +23,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       parts: [{ text: msg.content }],
     }));
 
-    // Fetch available models
-    // Use a predefined model name directly
     const modelName = "gemini-default-model"; // Replace with the actual model name from the library documentation
     console.log("Using model:", modelName);
     if (!modelName) {
@@ -33,17 +31,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const model = genAI.getGenerativeModel({ model: modelName });
 
-    // Start a new chat session
     const chat = model.startChat({ history: formattedHistory });
 
-    // Get the last user message
     const userMessage = messages[messages.length - 1].content;
 
     if (!userMessage) {
       return res.status(400).json({ error: "Empty message content" });
     }
 
-    // Send the message
     const response = await chat.sendMessage([{ text: userMessage }]);
     console.log(response);
     if (!response.response.candidates || response.response.candidates.length === 0) {
@@ -51,8 +46,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     res.status(200).json({ role: "model", content: response.response.candidates[0].content.parts[0].text });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error:", error);
-    res.status(500).json({ error: error.message || "Something went wrong" });
+
+    if (error instanceof Error) {
+      res.status(500).json({ error: error.message || "Something went wrong" });
+    } else {
+      res.status(500).json({ error: "An unknown error occurred" });
+    }
   }
 }

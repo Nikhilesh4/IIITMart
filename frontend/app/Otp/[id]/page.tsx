@@ -42,7 +42,7 @@ export default function OTPVerification({ params }: { params: Promise<Params> })
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/orders/closeorder", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/orders/closeorder`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -228,7 +228,7 @@ export default function OTPVerification({ params }: { params: Promise<Params> })
                 className="resend-button"
                 disabled={loading}
               >
-                Didn't receive code? Resend OTP
+                Didn&apos;t receive code? Resend OTP
               </button>
             </div>
           </div>

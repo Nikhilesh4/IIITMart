@@ -41,7 +41,7 @@ export default function ChatUI(): JSX.Element {
     setLoading(true);
 
     try {
-      const response = await axios.post("/api/chat", { messages: updatedMessages });
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/chat`, { messages: updatedMessages });
       setMessages([
         ...updatedMessages, 
         { 
@@ -104,7 +104,7 @@ export default function ChatUI(): JSX.Element {
                   Start a conversation
                 </h3>
                 <p className="text-gray-500 max-w-md">
-                  Ask me anything! I'm here to help with questions, tasks, or just have a friendly chat.
+                  Ask me anything! I&apos;m here to help with questions, tasks, or just have a friendly chat.
                 </p>
               </div>
             )}

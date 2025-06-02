@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 // const bcrypt = require('bcrypt');
 // const { v4: uuidv4 } = require('uuid');
 const Schema = mongoose.Schema;
+
 const ItemsSchema = new mongoose.Schema(
   {
     ItemName: {
@@ -20,7 +21,7 @@ const ItemsSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    SellerName:{
+    SellerName: {
       type: String,
       required: true,
     },
@@ -28,6 +29,10 @@ const ItemsSchema = new mongoose.Schema(
       type: Schema.Types.ObjectId,
       ref: "users", // The collection name you want to reference
       required: true,
+    },
+    ImageURL: {
+      type: String,
+      required: false, // set to true if image is mandatory
     },
   },
   { timestamps: true }

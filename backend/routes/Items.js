@@ -9,7 +9,7 @@ const User = require("../models/Users.js");
 const Item = require("../models/Items.js");
 
 router.post("/additems", verifyToken, async (req, res) => {
-  const { ItemName, Price, Description, Category } = req.body;
+  const { ItemName, Price, Description, Category,ImageUrl } = req.body;
   const id = await User.findOne({ _id: req.userId });
  
   if (!id) {
@@ -22,6 +22,7 @@ router.post("/additems", verifyToken, async (req, res) => {
     Category,
     SellerName: id.firstName + id.lastName,
     SellerID: req.userId,
+    ImageURL:ImageUrl
   });
   await item.save();
   res.status(200).json({ message: "Item added successfully." });
@@ -45,6 +46,7 @@ router.get("/getitembyid", verifyToken, async (req, res) => {
       Category: itemdetails.Category,
       Sellername: user.firstName + user.lastName,
       SellerID: itemdetails.SellerID,
+      ImageURL: itemdetails.ImageURL,
     },
     message: "Item details fetched successfully.",
   });

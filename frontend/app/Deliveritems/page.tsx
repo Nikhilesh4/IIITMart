@@ -44,15 +44,7 @@ interface Order {
   Status: string;
 }
 
-interface DeliveryManagementProps {
-  apiEndpoint?: string;
-  onOrderComplete?: (orderId: string) => void;
-}
-
-export default function DeliveryManagement({ 
-  apiEndpoint = "http://localhost:5000/api/users/pendingorders",
-  onOrderComplete 
-}: DeliveryManagementProps) {
+export default function DeliveryManagement() {
   const router = useRouter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -63,11 +55,7 @@ export default function DeliveryManagement({
 
   const handleCompleteOrder = (orderId: string) => {
     console.log("Completing order:", orderId);
-    if (onOrderComplete) {
-      onOrderComplete(orderId);
-    } else {
-      router.push(`/Otp/${orderId}`);
-    }
+    router.push(`/Otp/${orderId}`);
   };
 
   const getStatusColor = (status: string): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
@@ -99,7 +87,7 @@ export default function DeliveryManagement({
 
       try {
         setLoading(true);
-        const response = await fetch(apiEndpoint, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/pendingorders`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -123,7 +111,7 @@ export default function DeliveryManagement({
     };
 
     fetchOrders();
-  }, [apiEndpoint]);
+  }, []);
 
   if (loading) {
     return (
@@ -309,7 +297,7 @@ export default function DeliveryManagement({
           </TableRow>
         </TableHead>
         <TableBody>
-          {orders.map((order, index) => (
+          {orders.map((order) => (
             <TableRow
               key={order._id}
               sx={{
