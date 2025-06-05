@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { redirect } from "next/navigation";
-import { UserRoundPen } from 'lucide-react';
+import { User } from 'lucide-react';
 import { Search } from 'lucide-react';
 import { ShoppingCart } from 'lucide-react';
 import { ShoppingBag } from 'lucide-react';
@@ -10,12 +10,14 @@ import { MessageCircleMore } from 'lucide-react';
 import {
   Menu,
   X,
-  LogOut
+  LogOut,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import Cookies from "js-cookie";
-import Button from "react-bootstrap/esm/Button";
 
-const HorizontalNavLayout = ({ children }) => {
+const VerticalSidebarLayout = ({ children }) => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeLink, setActiveLink] = useState("Profile");
 
@@ -23,7 +25,7 @@ const HorizontalNavLayout = ({ children }) => {
     {
       id: "Profile",
       title: "Profile",
-      icon: <UserRoundPen className="w-5 h-5" />,
+      icon: <User className="w-5 h-5" />,
       href: "/",
     },
     {
@@ -58,6 +60,7 @@ const HorizontalNavLayout = ({ children }) => {
     },
   ];
 
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
   const handleLogout = () => {
@@ -69,111 +72,175 @@ const HorizontalNavLayout = ({ children }) => {
 
   const handleLinkClick = (id, href) => {
     setActiveLink(id);
-    setIsMobileMenuOpen(false); // Close mobile menu on link click
+    setIsMobileMenuOpen(false);
     redirect(href);
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header Navigation */}
-      <header className="bg-white border-b-2 border-gray-100 shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Brand/Logo */}
-            <div className="flex-shrink-0">
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
-                Buy & Sell <span className="text-blue-600">@IIITH</span>
-              </h1>
-            </div>
-
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center space-x-1">
-              {menuItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => handleLinkClick(item.id, item.href)}
-                  className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-gray-50 hover:scale-105 ${
-                    activeLink === item.id
-                      ? "bg-blue-50 text-blue-700 border border-blue-200"
-                      : "text-gray-700 hover:text-gray-900"
-                  }`}
-                >
-                  <span className="mr-2">{item.icon}</span>
-                  <span className="hidden xl:inline">{item.title}</span>
-                </button>
-              ))}
-              
-              {/* Logout Button */}
-              <button
-                onClick={handleLogout}
-                className="flex items-center px-4 py-2 ml-4 bg-red-50 text-red-700 rounded-lg text-sm font-medium hover:bg-red-100 transition-all duration-200 border border-red-200 hover:scale-105"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                <span className="hidden xl:inline">Logout</span>
-              </button>
-            </nav>
-
-            {/* Mobile menu button */}
-            <div className="lg:hidden">
-              <button
-                onClick={toggleMobileMenu}
-                className="p-2 rounded-lg text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none transition-colors duration-200"
-                aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-              >
-                {isMobileMenuOpen ? (
-                  <X className="w-6 h-6" />
-                ) : (
-                  <Menu className="w-6 h-6" />
-                )}
-              </button>
-            </div>
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Desktop Sidebar */}
+      <aside className={`hidden lg:flex flex-col bg-white shadow-lg transition-all duration-300 ease-in-out ${
+        isSidebarOpen ? 'w-64' : 'w-16'
+      } fixed left-0 top-0 h-screen z-40`}>
+        {/* Sidebar Header */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 h-16">
+          <div className={`transition-all duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden'}`}>
+            <h1 className="text-lg font-bold text-gray-900 whitespace-nowrap">
+              Buy & Sell <span className="text-blue-600">@IIITH</span>
+            </h1>
           </div>
+          <button
+            onClick={toggleSidebar}
+            className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex-shrink-0"
+          >
+            {isSidebarOpen ? (
+              <ChevronLeft className="w-4 h-4 text-gray-600" />
+            ) : (
+              <ChevronRight className="w-4 h-4 text-gray-600" />
+            )}
+          </button>
         </div>
 
-        {/* Mobile Navigation Menu */}
-        <div
-          className={`lg:hidden transition-all duration-300 ease-in-out overflow-hidden ${
-            isMobileMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-          }`}
-        >
-          <div className="bg-white border-t border-gray-100 px-4 py-3">
-            <nav className="space-y-2">
-              {menuItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => handleLinkClick(item.id, item.href)}
-                  className={`w-full flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    activeLink === item.id
-                      ? "bg-blue-50 text-blue-700 border border-blue-200"
-                      : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
-                  }`}
-                >
-                  <span className="mr-3">{item.icon}</span>
-                  <span>{item.title}</span>
-                </button>
-              ))}
+        {/* Navigation Menu */}
+        <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+          {menuItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => handleLinkClick(item.id, item.href)}
+              className={`w-full flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group relative ${
+                activeLink === item.id
+                  ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md"
+                  : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+              }`}
+            >
+              <span className={`flex-shrink-0 ${!isSidebarOpen && 'mx-auto'}`}>{item.icon}</span>
+              <span className={`ml-3 transition-all duration-300 ${
+                isSidebarOpen ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden'
+              }`}>
+                {item.title}
+              </span>
               
-              {/* Mobile Logout Button */}
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center px-4 py-3 mt-4 bg-red-50 text-red-700 rounded-lg text-sm font-medium hover:bg-red-100 transition-all duration-200 border border-red-200"
-              >
-                <LogOut className="w-4 h-4 mr-3" />
-                <span>Logout</span>
-              </button>
-            </nav>
-          </div>
+              {/* Tooltip for collapsed sidebar */}
+              {!isSidebarOpen && (
+                <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50 pointer-events-none">
+                  {item.title}
+                  <div className="absolute top-1/2 -left-1 transform -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
+                </div>
+              )}
+            </button>
+          ))}
+        </nav>
+
+        {/* Logout Button */}
+        <div className="p-3 border-t border-gray-200">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center px-3 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg text-sm font-medium hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-md group relative"
+          >
+            <LogOut className={`w-4 h-4 flex-shrink-0 ${!isSidebarOpen && 'mx-auto'}`} />
+            <span className={`ml-3 transition-all duration-300 ${
+              isSidebarOpen ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden'
+            }`}>
+              Logout
+            </span>
+            
+            {/* Tooltip for collapsed sidebar */}
+            {!isSidebarOpen && (
+              <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50 pointer-events-none">
+                Logout
+                <div className="absolute top-1/2 -left-1 transform -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
+              </div>
+            )}
+          </button>
         </div>
-      </header>
+      </aside>
+
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Mobile Sidebar */}
+      <aside className={`lg:hidden fixed top-0 left-0 h-full w-64 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 ${
+        isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        {/* Mobile Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <h1 className="text-xl font-bold text-gray-900">
+            Buy & Sell <span className="text-blue-600">@IIITH</span>
+          </h1>
+          <button
+            onClick={toggleMobileMenu}
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+          >
+            <X className="w-5 h-5 text-gray-600" />
+          </button>
+        </div>
+
+        {/* Mobile Navigation */}
+        <nav className="py-6 px-4 space-y-2">
+          {menuItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => handleLinkClick(item.id, item.href)}
+              className={`w-full flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                activeLink === item.id
+                  ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg"
+                  : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+              }`}
+            >
+              <span className="mr-3">{item.icon}</span>
+              <span>{item.title}</span>
+            </button>
+          ))}
+        </nav>
+
+        {/* Mobile Logout */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm font-medium hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg"
+          >
+            <LogOut className="w-4 h-4 mr-3" />
+            <span>Logout</span>
+          </button>
+        </div>
+      </aside>
 
       {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg">
-          {children}
-        </div>
-      </main>
+      <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${
+        isSidebarOpen ? 'lg:ml-64' : 'lg:ml-16'
+      }`}>
+        {/* Mobile Header */}
+        <header className="lg:hidden bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
+          <div className="flex items-center justify-between px-4 py-3 h-16">
+            <button
+              onClick={toggleMobileMenu}
+              className="p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <h1 className="text-lg font-bold text-gray-900">
+              Buy & Sell <span className="text-blue-600">@IIITH</span>
+            </h1>
+            <div className="w-9"></div> {/* Spacer for alignment */}
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="flex-1 p-4">
+          <div className="h-full">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 h-full p-6 overflow-auto">
+              {children}
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   );
 };
 
-export default HorizontalNavLayout;
+export default VerticalSidebarLayout;
