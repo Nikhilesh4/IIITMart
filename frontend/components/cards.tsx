@@ -44,6 +44,7 @@ export default function MultiActionAreaCard({
         minHeight: { xs: '420px', sm: '450px' },
         height: 'auto',
         borderRadius: '16px',
+        border: '1px solid #e2e8f0',
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         overflow: 'hidden',
@@ -67,7 +68,7 @@ export default function MultiActionAreaCard({
           component="img"
           sx={{
             height: { xs: '200px', sm: '220px', md: '240px' },
-            objectFit: 'cover',
+            objectFit: 'contain',
             transition: 'transform 0.3s ease',
             '&:hover': {
               transform: 'scale(1.05)'
