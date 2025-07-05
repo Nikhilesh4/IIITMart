@@ -54,7 +54,7 @@ function Signup() {
       setError("Password must be at least 6 characters long");
       return;
     }
-
+    console.log("form submitted");
     const formData = new FormData(event.currentTarget);
     const data = {
       firstName: formData.get("firstName"),
@@ -64,7 +64,7 @@ function Signup() {
       email: formData.get("email"),
       password: formData.get("password"),
     };
-    const response = await fetch("/users/signup", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/signup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

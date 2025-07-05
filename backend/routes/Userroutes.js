@@ -94,14 +94,42 @@ router.post("/removefromcart", verifyToken, async (req, res) => {
   // console.log();
 });
 router.get("/getcart", verifyToken, async (req, res) => {
-  const user = await User.findOne({ _id: req.userId });
-  if (!user) {
-    return res.status(400).json({ message: "User not found." });
+  try {
+    // 1) grab the user
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // 2) for each cart entry, fetch its Item and pluck SellerName
+    const updatedCart = await Promise.all(
+      user.cart.map(async (cartEntry) => {
+        const details = await Item
+          .findById(cartEntry.itemId)
+          .select("SellerName")
+          .lean();
+
+        // inject sellerName (or null if missing)
+        return {
+          ...cartEntry.toObject(),        // bring along itemId, productName, price, sellerId
+          sellerName: details?.SellerName ?? null
+        };
+      })
+    );
+    console.log("Updated Cart:", updatedCart);  
+    // 3) send it back
+    return res
+      .status(200)
+      .json({
+        message: "Cart fetched successfully.",
+        cart: updatedCart
+      });
+  } catch (err) {
+    console.error("Error in /getcart:", err);
+    return res
+      .status(500)
+      .json({ message: "Internal server error." });
   }
-  
-  res
-    .status(200)
-    .json({ message: "Cart fetched successfully.", cart: user.cart });
 });
 
 router.get("/pendingorders", verifyToken, async (req, res) => {
@@ -153,7 +181,8 @@ router.post("/login", async (req, res) => {
 });
 
 router.post("/signup", async (req, res) => {
-
+  console.log("Signup request received");
+  console.log("Request body:", req.body);
   const { firstName, lastName, email, age, contactNumber, password } = req.body;
 
   if (
@@ -214,7 +243,11 @@ router.get("/getuserdetails", verifyToken, async (req, res) => {
   try {
     const user = await User.findOne({ _id: req.userId });
     if (user) {
-     
+     // in the user find the no of orders where user is the seller
+      const orders = await Order.find({ SellerID: user._id });
+      // count the no of orders and add it to the user object
+      // not in the reviews fields creatw a new field called reviews and add the no of orders
+      
       res.status(200).json({
         message: "User details fetched successfully.",
         firstName: user.firstName,
@@ -223,6 +256,8 @@ router.get("/getuserdetails", verifyToken, async (req, res) => {
         age: user.age,
         contactNumber: user.contactNumber,
         reviews: user.reviews,
+        // cart: user.cart,
+        ordersCount: orders.length, // Add the count of orders
       });
     } else {
       res.status(400).json({ message: "User not found." });

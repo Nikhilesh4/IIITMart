@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import { redirect } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { User } from 'lucide-react';
 import { Search } from 'lucide-react';
 import { ShoppingCart } from 'lucide-react';
@@ -20,6 +20,13 @@ const VerticalSidebarLayout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeLink, setActiveLink] = useState("Profile");
+  const [isHydrated, setIsHydrated] = useState(false);
+  const router = useRouter();
+
+  // Ensure consistent hydration
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   const menuItems = [
     {
@@ -67,14 +74,86 @@ const VerticalSidebarLayout = ({ children }) => {
     Cookies.remove("token");
     Cookies.remove("userdetails");
     console.log("Logout clicked");
-    redirect("/login");
+    router.push("/login");
   };
 
   const handleLinkClick = (id, href) => {
     setActiveLink(id);
     setIsMobileMenuOpen(false);
-    redirect(href);
+    router.push(href);
   };
+
+  // Show a consistent layout during hydration
+  if (!isHydrated) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex">
+        {/* Desktop Sidebar - Fixed width during hydration */}
+        <aside className="hidden lg:flex flex-col bg-white shadow-lg w-64 fixed left-0 top-0 h-screen z-40">
+          {/* Sidebar Header */}
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 h-16">
+            <div>
+              <h1 className="text-lg font-bold text-gray-900 whitespace-nowrap">
+                Buy & Sell <span className="text-blue-600">@IIITH</span>
+              </h1>
+            </div>
+            <button className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex-shrink-0">
+              <ChevronLeft className="w-4 h-4 text-gray-600" />
+            </button>
+          </div>
+
+          {/* Navigation Menu */}
+          <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+            {menuItems.map((item) => (
+              <button
+                key={item.id}
+                className={`w-full flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group relative ${
+                  activeLink === item.id
+                    ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md"
+                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                }`}
+              >
+                <span className="flex-shrink-0">{item.icon}</span>
+                <span className="ml-3">{item.title}</span>
+              </button>
+            ))}
+          </nav>
+
+          {/* Logout Button */}
+          <div className="p-3 border-t border-gray-200">
+            <button className="w-full flex items-center px-3 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg text-sm font-medium hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-md">
+              <LogOut className="w-4 h-4 flex-shrink-0" />
+              <span className="ml-3">Logout</span>
+            </button>
+          </div>
+        </aside>
+
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col min-h-screen lg:ml-64">
+          {/* Mobile Header */}
+          <header className="lg:hidden bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
+            <div className="flex items-center justify-between px-4 py-3 h-16">
+              <button className="p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+                <Menu className="w-5 h-5" />
+              </button>
+              <h1 className="text-lg font-bold text-gray-900">
+                Buy & Sell <span className="text-blue-600">@IIITH</span>
+              </h1>
+              <div className="w-9"></div>
+            </div>
+          </header>
+
+          {/* Main Content */}
+          <main className="flex-1 p-4 lg:p-6">
+            <div className="h-full">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 h-full p-4 lg:p-6 overflow-auto">
+                {children}
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -168,8 +247,8 @@ const VerticalSidebarLayout = ({ children }) => {
         isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         {/* Mobile Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h1 className="text-xl font-bold text-gray-900">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <h1 className="text-lg font-bold text-gray-900">
             Buy & Sell <span className="text-blue-600">@IIITH</span>
           </h1>
           <button
@@ -181,7 +260,7 @@ const VerticalSidebarLayout = ({ children }) => {
         </div>
 
         {/* Mobile Navigation */}
-        <nav className="py-6 px-4 space-y-2">
+        <nav className="flex-1 py-4 px-3 space-y-2 overflow-y-auto">
           {menuItems.map((item) => (
             <button
               key={item.id}
@@ -199,7 +278,7 @@ const VerticalSidebarLayout = ({ children }) => {
         </nav>
 
         {/* Mobile Logout */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+        <div className="p-3 border-t border-gray-200">
           <button
             onClick={handleLogout}
             className="w-full flex items-center px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm font-medium hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg"
@@ -231,9 +310,9 @@ const VerticalSidebarLayout = ({ children }) => {
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 p-4">
+        <main className="flex-1 p-4 lg:p-6">
           <div className="h-full">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 h-full p-6 overflow-auto">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 h-full p-4 lg:p-6 overflow-auto">
               {children}
             </div>
           </div>

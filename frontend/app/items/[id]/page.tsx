@@ -13,7 +13,7 @@ interface Item {
   price: number;
   Description: string;
   Category: string;
-  SellerName: string;
+  Sellername: string;
   ImageURL: string;
   SellerID: string;
 }
@@ -32,7 +32,7 @@ export default function Items({ params }: { params: Promise<Params> }) {
       if (token && resolvedParams?.id) {
         try {
           const response = await fetch(
-            `http://localhost:5000/api/items/getitembyid?id=${resolvedParams.id}`,
+            `${process.env.NEXT_PUBLIC_API_URL}/api/items/getitembyid?id=${resolvedParams.id}`,
             {
               method: "GET",
               headers: {
@@ -191,7 +191,7 @@ export default function Items({ params }: { params: Promise<Params> }) {
                             Seller
                           </span>
                           <p className="text-lg font-semibold text-gray-900">
-                            {items.SellerName}
+                            {items.Sellername}
                           </p>
                         </div>
                       </div>

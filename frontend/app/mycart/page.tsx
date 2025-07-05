@@ -11,7 +11,7 @@ interface Item {
   price: number;
   Description: string;
   Category: string;
-  SellerName: string;
+  sellerName: string;
   SellerID: string;
 }
 
@@ -55,7 +55,7 @@ export default function MyCart() {
 
       try {
         const response = await fetch(
-          `${apiBaseUrl}http://localhost:5000/api/users/getcart`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/users/getcart`,
           {
             method: "GET",
             headers: {
@@ -100,7 +100,7 @@ export default function MyCart() {
 
     try {
       const response = await fetch(
-        `${apiBaseUrl}http://localhost:5000/api/orders/placeorder`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/orders/placeorder`,
         {
           method: "POST",
           headers: {
@@ -147,7 +147,7 @@ export default function MyCart() {
 
     try {
       const response = await fetch(
-        `${apiBaseUrl}http://localhost:5000/api/users/removefromcart`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/users/removefromcart`,
         {
           method: "POST",
           headers: {
@@ -239,7 +239,7 @@ export default function MyCart() {
               Looks like you haven’t added any items to your cart yet.
             </p>
             <button
-              onClick={() => router.push("/products")}
+              onClick={() => router.push("/searchitems")}
               className="px-8 py-3 rounded-lg font-medium transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5"
               style={{
                 backgroundColor: theme.primary,
@@ -293,7 +293,7 @@ export default function MyCart() {
                           {item.Category}
                         </span>
                         <span style={{ color: theme.secondary }}>
-                          Seller: {item.SellerName}
+                          Seller: {item.sellerName}
                         </span>
                       </div>
                     </div>
@@ -411,7 +411,7 @@ export default function MyCart() {
                 </button>
 
                 <button
-                  onClick={() => router.push("/products")}
+                  onClick={() => router.push("/searchitems")}
                   className="w-full mt-3 py-3 rounded-xl font-medium border-2 transition-all duration-200 hover:shadow-md"
                   style={{
                     borderColor: theme.primary,

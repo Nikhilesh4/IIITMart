@@ -14,7 +14,7 @@ export default function Profile() {
   const [phone, setPhone] = useState("");
   const [age, setAge] = useState("");
   const [loading, setLoading] = useState(true);
-
+  const [ordersCount, setOrdersCount] = useState(0);
   const validateEmail = (email) => {
     const pattern = /(@students\.iiit\.ac\.in$|@iiit\.ac\.in$|@research\.iiit\.ac\.in$)/;
     return pattern.test(email.trim());
@@ -44,6 +44,8 @@ export default function Profile() {
           setAge(data.age || "");
           setEmail(data.email || "");
           setPhone(data.contactNumber || "");
+          console.log (data.ordersCount);
+          setOrdersCount(data.ordersCount || 0);
           setLoading(false);
         } catch (error) {
           console.error("Error fetching user details:", error);
@@ -179,7 +181,9 @@ export default function Profile() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-green-100">Items Sold</p>
-                    <p className="text-3xl font-bold">0</p>
+                    <p className="text-3xl font-bold"> 
+                     {ordersCount || 0} 
+                    </p>
                   </div>
                   <ShoppingBag size={32} className="text-green-200" />
                 </div>
@@ -217,7 +221,7 @@ export default function Profile() {
                   onClick={handleSellItems}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
                 >
-                  List Your First Item
+                  List New Item
                 </button>
               </div>
             </div>

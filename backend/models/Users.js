@@ -41,6 +41,7 @@ const userSchema = new mongoose.Schema({
       productName: { type: String, required: true },
       price: { type: Number, required: true, min: 0 }, 
       sellerId: { type: String, required: true } 
+      
     }],
     default: [] 
   },
